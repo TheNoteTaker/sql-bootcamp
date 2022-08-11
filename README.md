@@ -26,3 +26,17 @@
   for the data.
   - The database is the data itself and all of it. The __DBMS__ is the UI for it.
   - They're often referred to as the same thing
+
+## MySQL vs SQL
+
+### __SQL _(Structured Query Language)___
+
+- The language we use to "talk" to our databases
+- SQL is used to write inside of DBMS's such as MySQL
+- There is a standard for how SQL should work, and all DBMS's are tasked with
+  implementing that standard and making them work.
+
+#### Two Takeaways
+
+- It's very easy to switch after learning SQL
+- What makes databases (DBMS) unique are the features they offer, not the language.
