@@ -40,3 +40,19 @@
 
 - It's very easy to switch after learning SQL
 - What makes databases (DBMS) unique are the features they offer, not the language.
+
+## Using __Goorm__ and __SQL__
+
+- `mysql-ctrl {command}`
+  - `start` (will start mysql)
+  - `stop` (will stop mysql)
+  - `cli` (Will stop and then start mysql)
+    - Stands for _Command Line Interface_
+- `use {database_name}` (Changes the database being used)
+- `source {database_filename}` (Run code from a query file)
+- `desc {table}`
+- `create {database_name}` (Creates a database)
+- `drop {database_name}` (permanently destroys a database)
+- `SELECT database()` (Tells you the current database being used)
+
+
