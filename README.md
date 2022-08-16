@@ -1,6 +1,6 @@
 # <u>MySQL Master Bootcamp</u>
 
-## General Notes:
+## General Notes
 
 # Section 2: Overview
 
@@ -111,6 +111,8 @@ CREATE TABLE cats
 
 ## General Notes
 
+- `SHOW WARNINGS` (Shows all warnings)
+
 ### Syntax
 
 Incorrect syntax:
@@ -137,8 +139,28 @@ VALUES      (value,
 
 ```sql
 INSERT INTO <tablename>
-            (column, column)
+            (column type, column type)
 VALUES      (value, value),
             (value, value),
             (value, value);
 ```
+
+## NULL and NOT NULL
+
+- When a value is not given for a column, `NULL` is put in its place.
+- To require a value for a field:
+```sql
+CREATE TABLE <tablename>(column type NOT NULL);
+```
+  - The `NOT NULL` part throws a `warning` if the value is empty when being inserted.
+
+## Setting Default Values
+```sql
+CREATE TABLE <tablename>
+    (
+        column type DEFAULT <default_value>
+)
+```
+
+- It's important to specify `NOT NULL` as a value can still manually be set to 
+  `NULL`.
