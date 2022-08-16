@@ -11,6 +11,7 @@
   - MySQL
   - Oracle Database
   - SQLite
+- _Types_ cannot be mixed and are specified upon creation. (Statically Typed)
 
 ## What is a Database?
 
@@ -47,12 +48,65 @@
   - `start` (will start mysql)
   - `stop` (will stop mysql)
   - `cli` (Will stop and then start mysql)
-    - Stands for _Command Line Interface_
+    - Stands for ___Command Line Interface___
 - `use {database_name}` (Changes the database being used)
 - `source {database_filename}` (Run code from a query file)
-- `desc {table}`
+- `desc {table}` (Shows the contents of a table)
+  - Shorthand for `SHOW COLUMNS FROM {tablename}`
 - `create {database_name}` (Creates a database)
 - `drop {database_name}` (permanently destroys a database)
 - `SELECT database()` (Tells you the current database being used)
+- `show {tables | databases}` (Shows all tables or databases)
 
+## What is a Table?
+
+A table is a collection of related data held in a structured format within a 
+database.
+
+- __Columns__ (Headers)
+
+## Different __Types__ in SQL
+
+|  Numeric  |   String   |   Date    |
+|:---------:|:----------:|:---------:|
+ |    INT    |    CHAR    |   DATE    |
+| SMALLINT  |  VARCHAR   | DATETIME  |
+|  TINYINT  |   BINARY   | TIMESTAMP |
+| MEDIUMINT | VARBINARY  |   TIME    |
+|  BIGINT   |    BLOB    |   YEAR    |
+|  DECIMAL  |  TINYBLOB  |           |
+|  NUMERIC  | MEDIUMBLOB |           |
+|   FLOAT   |  LONGBLOB  |           |
+|  DOUBLE   |    TEXT    |           |
+|    BIT    |  TINYTEXT  |           |
+|           | MEDIUMTEXT |           |
+|           |  LONGTEXT  |           |
+|           |    ENUM    |           |
+
+### SQL Types
+
+- __INT__ (whole number)
+- __varchar__ (variable-length string between 1-255 characters)
+
+## Creating Tables
+
+- Table names should be pluralized. It's because a table describes multiple of
+  the thing, not just one.
+
+```SQL
+CREATE TABLE tablename
+  (
+      column_name data_type,
+      column_name data_type,
+  );
+
+/* Example: */
+    CREATE TABLE cats
+      (
+          name VARCHAR(100),
+          age INT
+      );
+```
+
+[!hello](https://www.google.com)
 
