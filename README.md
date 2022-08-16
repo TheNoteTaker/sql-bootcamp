@@ -164,3 +164,26 @@ CREATE TABLE <tablename>
 
 - It's important to specify `NOT NULL` as a value can still manually be set to 
   `NULL`.
+
+## Primary Keys
+
+- If you have multiple entries, you need to be able to tell them apart. That's
+  when you use a __Primary Key__ ___(A unique identifier)___.
+
+```sql
+CREATE TABLE unique_cats (cat_id INT AUTO_INCREMENT NOT NULL
+                         ,name VARCHAR(100)
+                         ,age INT
+                         ,PRIMARY KEY(cat_id)  /* Give the name of the field */
+                          );
+
+/* The second way to write it is to put PRIMARY KEY at the end */
+
+CREATE TABLE unique_cats (cat_id INT AUTO_INCREMENT NOT NULL PRIMARY KEY
+                         ,name VARCHAR(100)
+                         ,age INT
+                          );
+```
+
+- `AUTO_INCREMENT` will automatically increase the value for each entry.
+  - It will appear under `EXTRA` when `DESC` is used.
