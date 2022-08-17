@@ -112,6 +112,7 @@ CREATE TABLE cats
 ## General Notes
 
 - `SHOW WARNINGS` (Shows all warnings)
+- `size` is a reserved word. Don't use it for a column name.
 
 ### Syntax
 
@@ -187,3 +188,86 @@ CREATE TABLE unique_cats (cat_id INT AUTO_INCREMENT NOT NULL PRIMARY KEY
 
 - `AUTO_INCREMENT` will automatically increase the value for each entry.
   - It will appear under `EXTRA` when `DESC` is used.
+
+## CRUD
+
+- __C__ reate
+  - ```sql
+    INSERT INTO
+    ```
+- __R__ ead
+  - ```sql
+    SELECT
+    ```
+    - Can use `*` or the name of a `column` or multiple `columns`
+    - ```sql
+      SELECT column, column from <table>;
+      ```
+- __U__ pdate
+  - ```sql
+    UPDATE <table> SET <column>=<value> WHERE <column>=<value>
+    ```
+- __D__ elete
+- ```sql
+    DELETE FROM <table> WHERE column=<value>;
+    ```
+
+Common in many areas of web development, not just databases.
+
+### WHERE clause
+
+Used to find specific information, not just check in on the table
+
+  - I.e. Finding someone by their username and checking that their password matches
+- Used almost everywhere
+- **Case-insensitive**
+
+```sql
+SELECT * FROM <table> WHERE <column>=<value>;
+
+/* Example */
+
+SELECT * FROM cats WHERE age=4;
+```
+
+### Aliases
+
+Specify how our data should be displayed back to us. Changes the name of the 
+column temporarily to what's specified when it's displayed in a table.
+
+```sql
+SELECT column AS <temporary name>, column FROM <table>
+
+/* Example */
+SELECT cat_id AS id, name FROM cats;
+```
+
+- In this example `cat_id` has been changed to `id`. It's useful for when there
+  are two databases with the same column. This way, you can tell them apart.
+
+### Update
+
+Good rule of thumb before updating is to run the equivalent `SELECT` to make sure
+you're updating the correct data.
+
+```sql
+UPDATE table SET column=<value>
+WHERE column=<value>;
+
+/* Example */
+UPDATE cats SET breed='Shorthair'
+WHERE breed='Tabby';
+```
+
+### Delete
+
+Same syntax as `SELECT`, except without a `column` after `DELETE`.
+
+```sql
+    DELETE FROM <table> WHERE column=<value>;
+```
+
+- The IDs will not shift when an item is deleted, as they're generated at
+  creation.
+  - This can be problematic if they were changed, as the IDs are often stored 
+    in multiple tables.
