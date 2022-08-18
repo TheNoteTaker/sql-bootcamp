@@ -6,6 +6,7 @@
 
 ## General Notes
 
+- To comment in __SQL__, use `--`, `/* */`, or `#`
 - Some of the most common __DBMS's__ _(Database Management Systems)_:
     - PostgreSQL
     - MySQL
@@ -271,3 +272,97 @@ Same syntax as `SELECT`, except without a `column` after `DELETE`.
   creation.
   - This can be problematic if they were changed, as the IDs are often stored 
     in multiple tables.
+
+# Section 7: String Functions
+
+## General Notes
+
+## Concat
+
+`CONCAT` Combine data for cleaner output
+
+```sql
+SELECT CONCAT(column, column, 'text', ...) FROM <table>;
+    
+/* Example s*/
+    
+SELECT CONCAT(author_fname, ' ', author_lname) AS 'Full Name' FROM books;
+
+
+SELECT author_fname AS first, author_lname AS last, 
+CONCAT(author_fname, ' ', author_lname) AS 'Full Name' 
+FROM books;
+```
+
+When dealing with multiple values that will all need a separator, using `CONCAT_WS` 
+will save time:
+```sql
+SELECT CONCAT_WS(<separator>, column, column, ...) FROM <table>
+```
+
+## Substring
+
+Work with parts of a string. `SUBSTR()` is the shorthand.
+
+```sql
+SELECT SUBSTRING(column, start, end) FROM <table>;
+
+SELECT SUBSTRING('Hello World', 1, 4);
+SELECT SUBSTR('Hello World', 1, 4);
+```
+
+- Unlike other programming languages like Python, the index does not start at 0.
+- Only giving one number will produce all letters from there to the end.
+  - i.e. `SELECT SUBSTRING('Hello World', 7)` will give `World`
+  - Negative numbers are also applicable
+
+### Combination Query Example
+
+```sql
+SELECT CONCAT
+    (
+        SUBSTRING(column, start, end),
+        column/text,
+        column/text
+     ) AS 'My Concat'
+FROM <table>;
+```
+
+## Replace
+
+Replace parts of a string
+
+```sql
+SELECT REPLACE(text, text_to_replace, replacement_text)
+FROM <table>;
+```
+
+- Replaces __all__ occurrences of `text_to_replace` with `replacement_text` in 
+  the string
+- It __is__ case-sensitive
+
+## Reverse
+
+Reverses a string
+
+```sql
+SELECT REVERSE(column) FROM <table>;
+```
+
+## Char_Length
+
+Counts characters in a string. The long-form is `CHARACTER_LENGTH`.
+
+```sql
+SELECT CHAR_LENGTH(column) FROM <table>;
+```
+
+## UPPER and LOWER
+
+Converts the string to either upper or lower-case.
+
+```sql
+SELECT UPPER(column) FROM <table>;
+
+SELECT LOWER(column) FROM table;
+```
