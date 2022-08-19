@@ -2,11 +2,17 @@
 
 ## General Notes
 
+- Wildcards in __SQL__:
+  - `%` (Any character)
+  - `_` (Any character, but only results where there are the same amount of
+    characters as there are underscores)
+  - Escape the character if you need to use either
+- To comment in __SQL__, use `--`, `/* */`, or `#`
+
 # Section 2: Overview
 
 ## General Notes
 
-- To comment in __SQL__, use `--`, `/* */`, or `#`
 - Some of the most common __DBMS's__ _(Database Management Systems)_:
     - PostgreSQL
     - MySQL
@@ -366,3 +372,113 @@ SELECT UPPER(column) FROM <table>;
 
 SELECT LOWER(column) FROM table;
 ```
+
+# Section 8: Refining Our Selections
+
+## Distinct
+
+Used in conjunction with `SELECT`. If there's duplicates, it will only give the
+unique ones.
+
+- Comes right after `SELECT`
+
+```sql
+SELECT DISTINCT column FROM <table>;
+
+-- Example
+
+SELECT DISTINCT author_lname FROM books;
+```
+
+- To get a `DISTINCT` of multiple columns, you can either:
+  - Use `CONCAT`
+  - Use multiple columns:
+    - ```sql
+      SELECT DISTINCT column, column FROM <table>
+      ```
+      - Will only select unique columns where both values are unique. Applies 
+        it to the entire row.
+
+## ORDER BY
+
+Sorting our results
+
+```sql
+SELECT column FROM <table> ORDER BY column;
+
+-- Example
+
+SELECT DISTINCT author_lname, author_fname 
+FROM books 
+ORDER BY author_lname;
+```
+
+- Ascending by default. Can be changed by assing `DESC` after the columns to sort
+  by:
+  - ```sql
+    SELECT DISTINCT author_lname, author_fname 
+    FROM books 
+    ORDER BY author_lname DESC;
+    ```
+- Each selected column is given an index number starting from 1 that can be used
+  as a shortcut, rather than typing the column:
+  - ```sql
+    SELECT DISTINCT author_lname, author_fname 
+    FROM books 
+    ORDER BY 2;
+    -- This is ordering by author_fname
+    ```
+- It's possible to `ORDER BY` multiple columns. They will be ordered from left to
+  right, prioritizing the column before it.
+  - ```sql
+    SELECT DISTINCT title, author_lname, author_fname 
+    FROM books 
+    ORDER BY title, author_lname;
+    ```
+    
+## Limit
+
+Specify a number for how many results to select.
+
+- Used in conjunction with `ORDER BY`
+
+```sql
+SELECT column FROM <table> LIMIT <int>;
+
+-- Examples
+
+SELECT * FROM books LIMIT 3;
+
+SELECT title, released_year FROM books
+ORDER BY released_year DESC LIMIT 5;
+```
+
+- A range `<int>, <int>` can be given instead of a single number. The first number
+  is the offset, and the second number is how many rows to fetch starting
+  there _(including that row)_
+  - An example of when to use this is a blog site for pagination.
+  - To retrieve all rows from a certain offset, a number larger than the amount
+    of rows can be given _(i.e. 99999999999999)_
+
+## Like
+
+Better searching. Allows the use of wildcards and partial matches using patterns.
+
+```sql
+SELECT * FROM <table> WHERE column LIKE '%<value>%';
+
+-- Examples
+
+-- Find all rows where author_fname contains 'da'
+SELECT title, author_fname FROM books WHERE author_fname LIKE '%da%';
+
+-- Find all rows where author_fname starts with 'da'
+SELECT title, author_fname FROM books WHERE author_fname LIKE 'da%';
+
+-- Find all rows where author_fname ends with 'da'
+SELECT title, author_fname FROM books WHERE author_fname LIKE 'da%';
+
+SELECT "(235)234-0987" LIKE '(___)___-____' ;
+```
+
+- This is __not__ case-sensitive
