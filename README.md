@@ -375,6 +375,11 @@ SELECT LOWER(column) FROM table;
 
 # Section 8: Refining Our Selections
 
+## General Notes
+
+- Using Parenthesis `()` can create a __sub-query__ that will execute first.
+  - This is slow though as `SELECT` is slow and two queries are being run
+
 ## Distinct
 
 Used in conjunction with `SELECT`. If there's duplicates, it will only give the
@@ -482,3 +487,123 @@ SELECT "(235)234-0987" LIKE '(___)___-____' ;
 ```
 
 - This is __not__ case-sensitive
+
+# Section 9: Aggregate Functions
+
+## General Notes
+
+## Count
+
+Count how many of something are in a specific column, or all columns.
+
+```sql
+SELECT COUNT(*) FROM <table>;
+SELECT COUNT(column) FROM <table>;
+SELECT COUNT(DISTINCT column) FROM <table>;
+SELECT COUNT(DISTINCT column, column) FROM <table>;
+```
+
+- Using `*` says to count all rows in `table`.
+- `DISTINCT` needs to be used inside the parenthesis when using `COUNT`.
+  - Using multiple columns when using `DISTINCT` will only return rows where both
+    columns are unique.
+  - Multiple rows can only be used when `DISTINCT` is being used.
+- A super row is created and displayed 
+
+## Group By
+
+Summarizes or aggregates identical data into single rows
+
+```sql
+SELECT column, column FROM <table>
+GROUP BY column;
+
+-- COUNT here is counting how many sub-rows are in each row.
+SELECT column, COUNT(*) FROM <table>
+GROUP BY column;
+
+-- Grouping by multiple columns will make sure both values are unique
+SELECT column, column, COUNT(*) FROM <table>
+GROUP BY column, column;
+
+-- Example
+SELECT title, author_lname FROM books
+GROUP BY author_lname;
+```
+
+- Creates a super row containing all entries that meet the criteria, even though
+  it may not be visually seen when displayed.
+- Meant to be used with another aggregate function like `COUNT()`, and not by
+  itself.
+  - Newer versions will throw an error if it's used by itself.
+- The `GROUP BY` is run first, and the `SELECT` applies to the groups created.
+
+## MIN and MAX
+
+Identify minimum and maximum values in a table.
+
+```sql
+SELECT MIN(column) FROM <table>;
+
+SELECT MAX(column) FROM <table>;
+```
+
+- If used on a string, it will find the shortest or longest string
+
+### A Problem:
+
+Using `MIN` or `MAX` with another column will retrieve the first value in the
+other column, independent of the max or minimum value.
+
+### Solution:
+
+#### Run a __Sub-query__
+
+```sql
+SELECT * FROM books
+WHERE pages = (SELECT MIN(pages)
+               FROM books);
+```
+
+- The sub-query will execute first.
+- Slow method
+
+#### Faster method:
+
+```sql
+SELECT * FROM books
+ORDER BY pages LIMIT 1;
+```
+
+### Using Group By with Min / Max
+
+```sql
+SELECT      author_fname,
+            author_lname,
+            MIN(released_year)
+FROM        books
+GROUP BY    author_lname, 
+            author_fname;
+```
+
+## Sum
+
+Adds all values in a column.
+
+```sql
+SELECT SUM(column) FROM <table>;
+```
+
+- Does not work for strings. Will return `0`.
+
+## Avg
+
+```sql
+SELECT AVG(column) FROM <table>;
+```
+
+- Does not work for strings. Will return `0`.
+- Gives 4 decimal points, but does not round up the result.
+  - Even if it's an even number, it will still give four `0`'s.
+
+
