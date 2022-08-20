@@ -606,4 +606,159 @@ SELECT AVG(column) FROM <table>;
 - Gives 4 decimal points, but does not round up the result.
   - Even if it's an even number, it will still give four `0`'s.
 
+# Section 10: Data Types
 
+## General Notes
+
+## VARCHAR vs CHAR
+
+- __`CHAR`__ has a fixed length that's specified upon table creation.
+  - If it's fewer, it will add spaces to make it the specified number.
+  - If it's longer, the rest will be chopped off.
+  - Faster for fixed length text
+    - Examples can be:
+      - State abbreviations: CA, NY
+      - Yes/No flags: Y/N
+      - Sex: M/F
+- __`VARCHAR`__ has a length that is specified, but does not have to be met with 
+  each value.
+
+|   Value   |  Char(4)  | Storage | Varchar(4) | Storage |
+|:---------:|:---------:|:-------:|:----------:|:-------:|
+|    ''     |   '  '    | 4 bytes |     ''     | 1 bytes |
+|   'ab'    |  'ab  '   | 4 bytes |    'ab'    | 3 bytes |
+|  'abcd'   |  'abcd'   | 4 bytes |   'abcd'   | 5 bytes |
+| 'abcdefg' | 'abcdefg' | 4 bytes | 'abcdefg'  | 5 bytes |
+
+## Int
+
+Whole numbers
+
+## Decimal
+
+Fixed point __type__, and calculations are exact.
+
+```sql
+DECIMAL(<total num of digits>, <digits after decimal>);
+    
+-- Example
+DECIMAL(5, 2);  -- 5 digits long, 2 decimal points after the number
+```
+
+- `DECIMAL` has a 0-30 range for decimal places.
+- The decimal places count towards the total amount of digits.
+- If a larger number is given than the amount of digits allowed, it will default
+  to _9's_ equal to the amount of allowed digits. 
+- Always use `DECIMAL`, unless precision doesn't matter.
+
+## Float and Double
+
+Floating-point __types__ and calculations are approximate.
+
+| Data Type | Memory Needed | Precision Issues |
+|:---------:|:-------------:|:----------------:|
+|   FLOAT   |    4 Bytes    |    ~7 digits     |
+|  DOUBLE   |    8 Bytes    |    ~15 digits    |
+
+- After the above amount of digits under precision, each type will begin having
+  precision issues.
+
+## Dates, Times, DateTimes
+
+More info can be found at [DateTime Fucntions Documentation](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html)
+and [DateTime Documentation](https://dev.mysql.com/doc/refman/8.0/en/datetime.html)
+
+- `DATE` - `YYYY-MM-DD` (Value with a date, but no time)
+- `TIME` - `HH:MM:SS` (Stores value with a time, but no date)
+- `DATETIME` - `YYYY-MM-DD HH:MM:SS` (Values with a Date __and__ Time)
+  - Use case: Storing when a row in a column is created
+
+### Functions for Time, Date, and DateTime
+
+- `CURDATE()` (Gives current date as a `DATE`)
+  - Same thing as `CURRENT_DATE`
+- `CURTIME()` (Gives current time as a `TIME`)
+  - Same thing as `CURRENT_TIME`
+- `NOW()` (Gives current datetime as a `DATETIME`)
+  - Same thing as `CURRENT_TIMESTAMP`
+- `DAY()` (Extracts day from `DATE` or `DATETIME`)
+- `DAYNAME()` (Extracts & returns the name of the weekday)
+- `DAYOFWEEK()` (Extracts & returns the number of that day within a week)
+- `DAYOFYEAR()` (Extracts & returns the day of the year)
+- `MINUTE()` (Extracts the minute)
+- `MONTH()` (Extracts the month of the year)
+- `MONTHNAME()` (Extracts & returns the name of the month)
+
+### Using Date Formatter (DATE_FORMAT)
+
+[Documentation](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_date-format)
+
+```sql
+SELECT DATE_FORMAT('2019-10-04 22:23:00', '%W %M %Y')
+        -> Sunday October 2009
+```
+
+#### DATEDIFF, DATE_SUB, & DATE_ADD
+
+[Add and Sub](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_date-add)
+
+[Datediff](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_datediff)
+
+```sql
+-- Datediff
+SELECT DATEDIFF(<datetime/date>, <datetime/date>);
+        -> <Resulting datetime/date>
+            
+-- Example
+mysql> SELECT DATEDIFF('2007-12-31 23:59:59','2007-12-30');
+        -> 1
+
+-- DATE_ADD
+SELECT DATE_ADD(<datetime/date, INTERVAL <int> <Unit of time>);
+        -> <Resulting datetime/date>
+
+-- Example
+SELECT DATE_ADD('2018-05-01',INTERVAL 1 DAY);
+        -> '2018-05-02'
+```
+
+- It's not possible to chain together additions and subtractions this way.
+
+It's also possible to just use `+/-` instead of a function.
+
+```sql
+SELECT <datetime/date> + INTERVAL <int> <Unit of time> FROM <table>;
+
+SELECT <datetime/date> 
+    + INTERVAL <int> <Unit of time> 
+    + INTERVAL <int> <Unit of time> 
+    FROM <table>;
+```
+
+- It's possible to chain together additions and subtractions this way.
+
+### Timestamps
+
+When used in tables, it's great to set `DEFAULT` to `NOW()`.
+
+- `TIMESTAMP` supports `1970-01-01 00:00:01.000000` to `2038-01-19 03:14:07.999999`
+- `DATETIME` supports `1000-01-01 00:00:00.000000` to `9999-12-31 23:59:59.999999`
+- `TIMESTAMP` takes up half as many bytes as `DATETIME`
+
+### ON UPDATE
+
+Used in table creation. Says that whenever the table is updated, do that thing.
+
+```sql
+CREATE TABLE <table> (
+    column <type> DEFAULT <value> ON UPDATE <function>
+)
+
+-- Example
+CREATE TABLE comments (
+    content_id INT NOT NULL AUTO_INCREMENT,
+    content VARCHAR(100),
+    modified_at TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(content_id)
+)
+```
