@@ -762,3 +762,159 @@ CREATE TABLE comments (
     PRIMARY KEY(content_id)
 )
 ```
+# Section 11: Logical Operators
+
+## General Notes
+
+- When comparing `CHAR`'s, it goes off ASCII values.
+
+## Not Equal _or_ !=
+
+Not equal to
+
+```sql
+SELECT column FROM <table> WHERE column != <value>;
+```
+
+## Not Like
+
+```sql
+SELECT column FROM <table> WHERE column NOT LIKE <value>;
+```
+
+## Greater Than _or_ >
+
+Check that a value is greater than another value.
+
+```sql
+SELECT column FROM <table> WHERE <value> > <value>;
+```
+## Greater Than or Equal To _or_ >=
+
+Check that a value is greater than or equal to another value.
+
+```sql
+SELECT column FROM <table> WHERE <value> >= <value>;
+```
+
+## Less Than _or_ >
+
+Check that a value is less than another value.
+
+```sql
+SELECT column FROM <table> WHERE <value> < <value>;
+```
+## Less Than or Equal To _or_ >=
+
+Check that a value is less than or equal to another value.
+
+```sql
+SELECT column FROM <table> WHERE <value> <= <value>;
+```
+
+## Logical AND _or_ &&
+
+```sql
+SELECT column FROM <table> WHERE <value>=<value> AND <value>=<value>;
+
+SELECT column FROM <table> WHERE <value>=<value> && <value>=<value>;
+```
+
+## Logical OR _or_ ||
+
+```sql
+SELECT column FROM <table> WHERE <value>=<value> OR <value>=<value>;
+
+SELECT column FROM <table> WHERE <value>=<value> || <value>=<value>;
+```
+
+## Cast
+
+Converts a value to a different __type__ for use in an expression.
+
+```sql
+CAST('2017-05-02' AS DATETIME);
+    
+-- Example
+SELECT birthdate FROM people
+WHERE birthdate BETWEEN CAST('2017-05-02') AND CAST('2017-06-02');
+```
+
+## Between
+
+Find a value between two values. Quicker than writing 
+`<value> >= <value> && <value> <= <value>`
+
+```sql
+SELECT column FROM <table> WHERE column BETWEEN <value> AND <value>;
+```
+
+- The `AND` here is not the same as the `&&` operator, and must always be paired
+  with `BETWEEN`.
+
+## Not Between
+
+Find a value between two values. Quicker than writing 
+`<value> >= <value> && <value> <= <value>`
+
+```sql
+SELECT column FROM <table> WHERE column NOT BETWEEN <value> AND <value>;
+```
+
+- The `AND` here is not the same as the `&&` operator, and must always be paired
+  with `NOT BETWEEN`.
+
+## IN and NOT IN
+
+Search that a value is in or not in a value.
+
+```sql
+-- In
+SELECT column FROM <table>
+WHERE column IN (<value to find>, <value to find>, <value to find>);
+
+-- Not In
+SELECT column FROM <table>
+WHERE column NOT IN (<value to find>, <value to find>, <value to find>);
+```
+
+- `column` must be __in__ or __not in__ the values in order to meet criteria. 
+  It's basically creating a list and checking that the column entry is in that
+  list.
+  - Can be slow when given a long list, as it iterates through each value,
+    checking against them.
+
+## Remainder _or_ %
+
+Modulo operator. Divides by a given value, and returns the remainder.
+
+```sql
+SELECT column FROM <table> 
+WHERE value % <value> = <value>;
+```
+
+## Case Statements
+
+If a certain case is met, then perform a function.
+- Control flow statement and the __sql__ version of `if else then` statements.
+
+```sql
+SELECT column,
+    CASE
+        WHEN <condition> THEN <function or value>
+        ELSE <function or value>
+    END AS <name of created column>
+FROM <table>;
+        
+-- Example
+SELECT title, released_year,
+    CASE
+        WHEN released_year >= 2000 THEN 'Modern Lit'
+        WHEN released_year >= 2015 THEN 'Super Modern Lit'
+        ELSE '20th Century Lit'
+    END AS GENRE
+FROM books;
+```
+
+- `column` is not necessary to select, and just the case can be selected.
+- `AS` is not necessary and is an `ALIAS`.
