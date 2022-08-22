@@ -505,9 +505,9 @@ SELECT COUNT(DISTINCT column, column) FROM <table>;
 
 - Using `*` says to count all rows in `table`.
 - `DISTINCT` needs to be used inside the parenthesis when using `COUNT`.
+  - Multiple rows can only be used when `DISTINCT` is being used.
   - Using multiple columns when using `DISTINCT` will only return rows where both
     columns are unique.
-  - Multiple rows can only be used when `DISTINCT` is being used.
 - A super row is created and displayed 
 
 ## Group By
@@ -884,7 +884,7 @@ WHERE column NOT IN (<value to find>, <value to find>, <value to find>);
   - Can be slow when given a long list, as it iterates through each value,
     checking against them.
 
-## Remainder _or_ %
+## Modulo _or_ %
 
 Modulo operator. Divides by a given value, and returns the remainder.
 
