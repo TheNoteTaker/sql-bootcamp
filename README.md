@@ -606,6 +606,15 @@ SELECT AVG(column) FROM <table>;
 - Gives 4 decimal points, but does not round up the result.
   - Even if it's an even number, it will still give four `0`'s.
 
+## Round
+
+Rounds a number up to a given digit count
+
+```sql
+SELECT ROUND(1.234565, 2);
+    -> 1.23
+```
+
 # Section 10: Data Types
 
 ## General Notes
@@ -763,6 +772,16 @@ CREATE TABLE comments (
 )
 ```
 
+### YEAR
+
+```sql
+CREATE <table> (
+    column YEAR(4) -- amount of numbers in the year
+)
+```
+
+- `YEAR(2)` is deprecated
+
 # Section 11: Logical Operators
 
 ## General Notes
@@ -919,6 +938,18 @@ FROM books;
 
 - `column` is not necessary to select, and just the case can be selected.
 - `AS` is not necessary and is an `ALIAS`.
+
+#### IF
+
+Checks a condition, and outputs a result based on it.
+
+```sql
+SELECT 
+    IF(<condition>, <result if true>, <result if false>)
+FROM <table>;
+```
+
+- Great when you don't need multiple outputs or conditional checks.
 
 ### Applying to a column rather than creating one:
 
@@ -1152,5 +1183,139 @@ RIGHT JOIN orders
     ON customers.id = orders.customer_id
 GROUP BY first_name, last_name
 ORDER BY amount DESC;
+```
+
+# Section 14: Many-To-Many
+
+## General Notes
+
+### Example
+
+1. ![Example of Many-To-Many](./assets/many_to_many01.png)
+2. ![Example of Many-To-Many](./assets/many_to_many02.png)
+
+## Working With Data
+
+### Creating the tables
+
+```sql
+CREATE TABLE reviewers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100)
+);
+
+CREATE TABLE series (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100),
+    released_year YEAR(4),
+    genre VARCHAR(100)
+);
+
+CREATE TABLE reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rating DECIMAL(2, 1),
+    series_id INT,
+    reviewer_id INT,
+    FOREIGN KEY(series_id) REFERENCES series(id),
+    FOREIGN KEY(reviewer_id) REFERENCES reviewers(id)
+);
+
+DESC reviewers;
+
+DESC series;
+
+DESC reviews;
+```
+### Inserting Values Into The Tables
+
+```sql
+INSERT INTO series (title, released_year, genre) VALUES
+    ('Archer', 2009, 'Animation'),
+    ('Arrested Development', 2003, 'Comedy'),
+    ("Bob's Burgers", 2011, 'Animation'),
+    ('Bojack Horseman', 2014, 'Animation'),
+    ("Breaking Bad", 2008, 'Drama'),
+    ('Curb Your Enthusiasm', 2000, 'Comedy'),
+    ("Fargo", 2014, 'Drama'),
+    ('Freaks and Geeks', 1999, 'Comedy'),
+    ('General Hospital', 1963, 'Drama'),
+    ('Halt and Catch Fire', 2014, 'Drama'),
+    ('Malcolm In The Middle', 2000, 'Comedy'),
+    ('Pushing Daisies', 2007, 'Comedy'),
+    ('Seinfeld', 1989, 'Comedy'),
+    ('Stranger Things', 2016, 'Drama');
+    
+INSERT INTO reviewers (first_name, last_name) VALUES
+    ('Thomas', 'Stoneman'),
+    ('Wyatt', 'Skaggs'),
+    ('Kimbra', 'Masters'),
+    ('Domingo', 'Cortes'),
+    ('Colt', 'Steele'),
+    ('Pinkie', 'Petit'),
+    ('Marlon', 'Crafford');
+    
+INSERT INTO reviews(series_id, reviewer_id, rating) VALUES
+    (1,1,8.0),(1,2,7.5),(1,3,8.5),(1,4,7.7),(1,5,8.9),
+    (2,1,8.1),(2,4,6.0),(2,3,8.0),(2,6,8.4),(2,5,9.9),
+    (3,1,7.0),(3,6,7.5),(3,4,8.0),(3,3,7.1),(3,5,8.0),
+    (4,1,7.5),(4,3,7.8),(4,4,8.3),(4,2,7.6),(4,5,8.5),
+    (5,1,9.5),(5,3,9.0),(5,4,9.1),(5,2,9.3),(5,5,9.9),
+    (6,2,6.5),(6,3,7.8),(6,4,8.8),(6,2,8.4),(6,5,9.1),
+    (7,2,9.1),(7,5,9.7),
+    (8,4,8.5),(8,2,7.8),(8,6,8.8),(8,5,9.3),
+    (9,2,5.5),(9,3,6.8),(9,4,5.8),(9,6,4.3),(9,5,4.5),
+    (10,5,9.9),
+    (13,3,8.0),(13,4,7.2),
+    (14,2,8.5),(14,3,8.9),(14,4,8.9);
+    
+SELECT * FROM series;
+
+SELECT * FROM reviewers;
+
+SELECT * FROM reviews;
+```
+
+### Example Joins
+
+#### Example 1
+
+```sql
+SELECT 
+    CONCAT_WS(" ", first_name, last_name) AS full_name,
+    title,
+    rating
+FROM reviews
+INNER JOIN reviewers
+    ON reviews.reviewer_id = reviewers.id
+INNER JOIN series
+    ON reviews.series_id = series.id
+ORDER BY rating DESC;
+```
+
+#### Example 2
+```sql
+SELECT
+    first_name,
+    last_name,
+    COUNT(rating) AS "COUNT",
+    IFNULL(MIN(rating), 0.0) AS "MIN",
+    IFNULL(MAX(rating), 0.0) AS "MAX",
+    IFNULL(
+        ROUND(
+    		AVG(rating),
+            2
+    	),
+        "0.00"
+    ) AS "AVG",
+    CASE
+    	WHEN COUNT(rating) >= 1 THEN 'ACTIVE'
+        ELSE 'INACTIVE'
+    END AS STATUS
+FROM reviewers
+LEFT JOIN reviews
+    ON reviews.reviewer_id = reviewers.id
+GROUP BY reviewers.id
+ORDER BY STATUS;
 ```
 
