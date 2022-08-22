@@ -762,6 +762,7 @@ CREATE TABLE comments (
     PRIMARY KEY(content_id)
 )
 ```
+
 # Section 11: Logical Operators
 
 ## General Notes
@@ -918,3 +919,238 @@ FROM books;
 
 - `column` is not necessary to select, and just the case can be selected.
 - `AS` is not necessary and is an `ALIAS`.
+
+### Applying to a column rather than creating one:
+
+#### `IS NULL`
+
+```sql
+SELECT 
+    first_name, 
+    last_name, 
+    order_date, 
+    amount IS NULL '0' -- Shorthand
+FROM customers
+LEFT JOIN orders
+	ON customers.id = orders.customer_id;
+GROUP BY customers.id
+ORDER BY total_spent;
+```
+
+#### `IFNULL()`
+```sql
+IFNULL(<value1>, <value to sub if value1 is null)
+
+SELECT 
+    first_name, 
+    last_name, 
+    order_date, 
+    IFNULL(SUM(amount), 0) AS total_spent -- Checks if null, and provides second argument if so
+FROM customers
+LEFT JOIN orders
+	ON customers.id = orders.customer_id;
+GROUP BY customers.id
+ORDER BY total_spent;
+```
+
+### Checking for NULL
+
+# Section 12: Relationships - One to Many
+
+## General Notes
+
+- When working with multiple tables, be explicit with which column belongs to
+  which table.
+  - Use `customers.id` instead of `id`.
+- [Animated visual of joins](https://dataschool.com/how-to-teach-people-sql/left-right-join-animated/)
+
+## Types of Relationships
+
+- __One to One Relationship__
+  - _Example:_ A customer has a customer detail table. Each customer has their own
+    customer detail entry.
+- __One to Many Relationship__
+  - _Example:_ A book has many reviews. All of those reviews belong to one book.
+  - The most common
+  - Refers to how many values in a separate table each can have a relationship to,
+    not how many tables.
+- __Many to Many Relationship__
+  - _Example:_ A two-way relationship. Books can have many authors, and those
+    authors can have many books.
+  - Refers to how many values in a separate table each can have a relationship to,
+    not how many tables.
+
+## One To Many
+
+The most common relationship.
+
+- The problem with having all the data in one table is duplicated info, and `NULL`
+  entries where the data was not used for that row.
+
+#### Example Relationship
+
+|    Customers    |     Orders      |
+|:---------------:|:---------------:|
+| __customer_id__ |    order_id     |
+|   first_name    |   order_date    |
+|    last_name    |     amount      |
+|      email      | __customer_id__ |
+
+- The `customer_id` is what connects the two tables.
+
+### Primary Key
+
+The unique identifier for that table. There's only one of each value for that
+column.
+
+### Foreign Key
+
+Reference to another table, within a table. 
+
+- Refers to the `PRIMARY KEY` of a different table, creating the relationship.
+- Creates a constraint
+  - Throws an error when trying to add a non-existent key from the other table
+  - Throws an error when trying to delete some data that other data is dependent
+    upon.
+
+```sql
+-- Used at the end of table creation, as the last value
+FOREIGN KEY(<key_from_current_table>) REFERENCES <table>(<PRIMARY KEY from that table>)
+    
+-- Example
+CREATE TABLE customers (
+    id INT NOT NULL AUTO_INCREMENT,
+    first_name,
+    last_name,
+    email,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE orders (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    order_date DATE,
+    amount DECIMAL(8, 2),
+    customer_id INT,
+    FOREIGN KEY(customer_id) 
+        REFERENCES customers(id)
+);
+```
+
+- It's conventional when using a `FOREIGN KEY` to have the column be named the of
+  the table it's referencing, followed by an underscore _, and then the name of
+  the column.
+  - `customer_id`
+- Known as an __implicit join__
+
+#### ON DELETE CASCADE
+
+When a value is deleted that has a corresponding value from the foreign table,
+delete that value as well.
+
+```sql
+CREATE TABLE orders (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    order_date DATE,
+    amount DECIMAL(8, 2),
+    customer_id INT,
+    FOREIGN KEY(customer_id) 
+        REFERENCES customers(id)
+        ON DELETE CASCADE
+```
+
+### Cross Join
+
+Almost never used and is an __Implicit Inner-Join__
+
+```sql
+SELECT * FROM table, table;
+
+SELECT * FROM customers, orders WHERE customers.id = customer_id;
+```
+
+- Cartesian/cross join
+- Creates every possible combination between two tables and is useless:
+    - ![cross join](/assets/cross-join.png)
+
+### Inner Join
+
+__Explicit Inner-Join__
+
+```sql
+SELECT * FROM table
+JOIN <table to join>
+    ON <key from table 1> = <key from table 2>;
+
+-- You can leave off INNER as it's implied
+SELECT * FROM table
+INNER JOIN <table to join>
+    ON <key from table 1> = <key from table 2>;
+
+-- Examples
+SELECT * FROM customers
+JOIN orders
+    ON customers.id = orders.customer_id;
+
+SELECT first_name, last_name, order_date, SUM(amount) AS total_spent FROM customers
+JOIN orders
+    ON customers.id = orders.customer_id
+GROUP BY orders.customer_id
+ORDER BY total_spent DESC;
+```
+
+- `JOIN` says the table to join
+- `ON` will only add the value to the column being created if the two keys
+  provided match.
+  - The foreign key and primary key are typically provided.
+
+### Left Join
+
+Say there's table A and B. Selects everything from A, along with any matching
+records in B.
+- Takes all from table A, and the union of table B.
+- Common convention
+
+```sql
+SELECT * FROM table
+LEFT JOIN <table to join>
+    ON <key from table 1> = <key from table 2>;
+```
+
+- An example of when to use this is if you're looking to see who's purchased with
+  the business to email them.
+
+![LEFT join](/assets/left-join.png)
+
+### Right Join
+
+Say there's table A and B. Selects everything from B, along with any matching
+records in A.
+- Takes all from table B, and the union of table A.
+- Not common convention
+  - Some IDE's and work environments don't even support it
+
+```sql
+SELECT * FROM table
+RIGHT JOIN <table to join>
+    ON <key from table 1> = <key from table 2>;
+```
+
+An example of when to use this is if someone accidentally deleted some customers
+from your database, and you need to know who. By doing a `RIGHT JOIN` on your
+orders, instead of a `LEFT JOIN`, it will be `NULL` for all customers that were
+deleted.
+
+```sql
+SELECT
+    IFNULL(first_name, 'MISSING') as first,
+    IFNULL(last_name, 'USER') as last,
+    order_date,
+    amount,
+    SUM(amount)
+FROM customers
+RIGHT JOIN orders
+    ON customers.id = orders.customer_id
+GROUP BY first_name, last_name
+ORDER BY amount DESC;
+```
+
