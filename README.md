@@ -196,6 +196,23 @@ CREATE TABLE unique_cats (cat_id INT AUTO_INCREMENT NOT NULL PRIMARY KEY
 - `AUTO_INCREMENT` will automatically increase the value for each entry.
   - It will appear under `EXTRA` when `DESC` is used.
 
+It's possible to use two primary keys to make sure there's no duplicates of the
+pair of those columns:
+```sql
+-- Likes Table. 
+-- Ensures one photo will not have the same user liking multiple times
+-- as both the photo_id and user_id pair must be unique in an entry
+CREATE TABLE likes (
+    photo_id INT NOT NULL,
+    user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY(photo_id) REFERENCES photos(id),
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    PRIMARY KEY(user_id, photo_id)
+);
+
+```
+
 ## CRUD
 
 - __C__ reate
@@ -1053,7 +1070,7 @@ CREATE TABLE customers (
     id INT NOT NULL AUTO_INCREMENT,
     first_name,
     last_name,
-    email,
+    email UNIQUE,
     PRIMARY KEY(id)
 );
 
@@ -1319,3 +1336,124 @@ GROUP BY reviewers.id
 ORDER BY STATUS;
 ```
 
+# Section 14: Instagram Database Clone
+
+## General Notes
+
+- If you will not be referencing a table, you don't always need to store an `id`.
+- Ask questions before you start working with the data.
+
+## Designing the Schema
+
+A few things we need to store:
+
+- Users
+- Photos
+- Comments
+- Likes
+- Hashtags
+- Followers / followees
+
+## Tagging Solutions:
+
+The best solution is a combination of 1 and 2.
+
+### Solution 1:
+
+![Tagging Solution One](/assets/tag_sol_1.png)
+
+- Faster with uncommon tags.
+
+### Solution 2:
+
+![Tagging Solution Two](/assets/tag_sol_2.png)
+
+### Solution 3:
+
+![Tagging Solution Three](/assets/tag_sol_3.png)
+
+- Fastest if working with common tags that are used often.
+  - Not as fast with uncommon tags
+
+## Creating The Tables
+
+```sql
+CREATE DATABASE ig_clone;
+USE ig_clone;
+
+-- Users Table
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) UNIQUE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Photos Table
+CREATE TABLE photos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    image_url VARCHAR(255) NOT NULL,
+    user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+-- Comments Table
+CREATE TABLE comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    comment_text VARCHAR(255) NOT NULL,
+    user_id INT NOT NULL,
+    photo_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(photo_id) REFERENCES photos(id)
+);
+
+-- Likes Table
+CREATE TABLE likes (
+    photo_id INT NOT NULL,
+    user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY(photo_id) REFERENCES photos(id),
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    PRIMARY KEY(user_id, photo_id)
+);
+
+-- Followers Table
+-- Who follows who
+CREATE TABLE follows (
+    follower_id INT NOT NULL,
+    followee_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (follower_id) REFERENCES users(id),
+    FOREIGN KEY (followee_id) REFERENCES users(id),
+    PRIMARY KEY(follower_id, followee_id)
+);
+
+-- Tags Table
+CREATE TABLE tags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tag_name VARCHAR(255) UNIQUE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Photo Tags Table
+-- Associate a tag with a photo
+CREATE TABLE photo_tags (
+    photo_id INT NOT NULL,
+    tag_id INT NOT NULL,
+    FOREIGN KEY (photo_id) REFERENCES photos(id),
+    FOREIGN KEY (tag_id) REFERENCES tags(id),
+    PRIMARY KEY(photo_id, tag_id)
+);
+```
+
+## Inserting The Values
+
+[Values](/static/ig_clone_data.sql)
+
+## Having
+
+Acts like `WHERE`, but takes grouped data and allows for filtering based off a
+clause.
+  - This is necessary, because `WHERE` comes __before__ `GROUP BY`, which means
+    it's impossible to filter the data using `WHERE` when trying to also group.
