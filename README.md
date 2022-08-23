@@ -1457,3 +1457,12 @@ Acts like `WHERE`, but takes grouped data and allows for filtering based off a
 clause.
   - This is necessary, because `WHERE` comes __before__ `GROUP BY`, which means
     it's impossible to filter the data using `WHERE` when trying to also group.
+
+# Section 16: Introducing Node
+
+## What is Node?
+
+- Javascript for backend
+  - An implementation of javascript so that it can be used on the backend.
+- Allows servers to be created so that another language like PHP or Ruby don't
+  need to be used.
