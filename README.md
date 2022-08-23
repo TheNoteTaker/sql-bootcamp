@@ -1466,3 +1466,27 @@ clause.
   - An implementation of javascript so that it can be used on the backend.
 - Allows servers to be created so that another language like PHP or Ruby don't
   need to be used.
+
+# Section 17: Building The Web App
+
+## General Notes
+
+- With __Express__, you add the tools you need as you need them.
+
+## NPM
+
+A better practice than using `npm install <package>` is to use `npm init`.
+  - This creates a __package.json__ file and states what packages and their
+    versions that have been installed.
+  - Run `npm install --save <package>` after creating the package, so that a
+    record is saved of each package installed.
+
+To install multiple packages:
+```js
+npm install --save <package> <package> <package> 
+```
+
+## EJS (Embedded Javascript)
+
+Templating language. An alternative to writing HTML that allows variables and
+code logic to be included.
