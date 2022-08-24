@@ -1490,3 +1490,156 @@ npm install --save <package> <package> <package>
 
 Templating language. An alternative to writing HTML that allows variables and
 code logic to be included.
+
+# Section 18: Database Triggers
+
+SQL statements that are automatically run when a specified table is changed.
+
+```sql
+DELIMITER $$
+
+CREATE TRIGGER trigger_name
+    trigger_time trigger_event ON table_name FOR EACH ROW
+    BEGIN
+    ...
+    END;
+$$
+        
+DELIMITER ;
+```
+
+| trigger_time | trigger_event | ON  | table_name |
+|:------------:|:-------------:|:---:|:----------:|
+|    BEFORE    |    INSERT     |     |   photos   |
+|    AFTER     |    UPDATE     |     |   users    |
+|              |    DELETE     |     |            |
+
+- Options for creating the trigger.
+- Whatever code is between `BEGIN` and `END` will run whenever the trigger is
+  activated.
+- Examples of time to use this: 
+  - Validating data.
+    - Enforce specific things on your data, such as not letting them sign up for
+      your application unless they're 18. Prevent the insert.
+    - Not the best use as you can enforce this in the web app code.
+  - Manipulating tables
+    - An initial table triggering data in another.
+      - If you want to know when someone unfollowed someone else.
+
+## General Notes
+
+- `SHOW TRIGGERS` (Shows all triggers in a very unorganized mess)
+- `DROP TRIGGER <triggername>` (Drops a trigger)
+- Triggers make debugging hard, as you have no way of identifying that something
+  is happening because of it (It's all behind the scenes).
+  - Some people have a tendency to chain triggers together.
+
+### When to use triggers:
+
+- Shopping carts where the total needs to be updates as things are put into a shopping cart
+
+## Examples
+
+### Example 1
+
+```sql
+DELIMITER $$
+
+CREATE TRIGGER must_be_adult
+    BEFORE INSERT ON people FOR EACH ROW
+    BEGIN
+        IF NEW.age < 18
+        THEN
+            SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Must be an adult!';
+        END IF;
+    END;
+$$
+        
+DELIMITER ;
+```
+
+- `FOR EACH ROW` is default syntax.
+- `NEW` refers to new data about to be inserted.
+  - `OLD` refers to data that was deleted.
+- __MySQL Errors__ (There are 3 parts):
+  1. A numeric code (1146)> This number is MySQL-specific
+  2. A five-character `SQLSTATE` value (`42S02`).
+       - The values are taken from ANSI SQL and ODBC and are more standardized.
+  3. A message string (`MESSAGE_TEXT`) - textual description of the error
+  - `SIGNAL SQLSTATE '45000'` is an `IF` condition. If error `45000` appears,
+    then do the following code.
+    - `45000` is a wildcard generic state representing __"unhandled user-defined
+      exception"__.
+- `DELIMITER $$` Changes the delimiter so that MySQL doesn't see each semicolon
+  as a SQL expression. To create the trigger, the entire piece of code needs to
+  be treated as one chunk.
+- `DELIMITER ;` changes the delimiter back to a semicolon.
+
+### Example 2
+
+```sql
+DELIMITER $$
+
+CREATE TRIGGER ig_trigger
+	BEFORE INSERT ON follows FOR EACH ROW
+	BEGIN
+    	IF NEW.follower_id = NEW.followee_id
+        THEN 
+        	SIGNAL SQLSTATE "45000"
+            SET MESSAGE_TEXT = 'You cannot follow yourself!';
+        END IF;
+    END;
+$$
+
+DELIMITER ;
+```
+
+### Example 3
+
+```sql
+DELIMITER $$
+
+CREATE TRIGGER unfollow_trigger
+	
+    AFTER DELETE ON unfollows FOR EACH ROW
+    BEGIN
+    	-- Syntax 1
+    	INSERT INTO unfollows(follower_id, followee_id)
+        VALUES(OLD.follower_id, OLD.followee_id);
+        
+        -- Syntax 2
+        INSERT INTO unfollows
+        SET follower_id = OLD.follower_id,
+            followee_id = OLD.followee_id;
+    END;
+
+$$
+
+DELIMITER ;
+```
+
+# Further Learning
+
+### Beginner to intermediate SQL
+
+- https://www.educba.com/data-science/data-science-tutorials/mysql-tutorial/
+- https://www.w3resource.com/mysql/mysql-tutorials.php
+- https://www.geeksforgeeks.org/sql-tutorial/?ref=gcse
+- https://www.mysqltutorial.org/
+- https://www.w3schools.com/sql/
+- https://www.geeksengine.com/database/sample/
+- https://www.khanacademy.org/computing/computer-programming/sql/
+
+### More advanced SQL
+
+- https://www.hackerrank.com/domains/sql
+- https://leetcode.com/study-plan/sql/
+- https://www.tutorialspoint.com/mysql/index.htm
+- https://sqlzoo.net/wiki/SQL_Tutorial
+
+### YouTube Creators (advanced)
+
+- https://www.youtube.com/c/techTFQ
+- https://www.youtube.com/c/LearnatKnowstar
+- https://www.youtube.com/channel/UCfGTc8zyBjCGg-Ilc4oAxEg/videos
